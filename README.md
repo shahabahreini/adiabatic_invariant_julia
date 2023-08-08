@@ -45,6 +45,15 @@ b) **Multi-Core Mode:** For multi-core processing, add '**-t [number of cores]**
 julia -t 4 Start.jl
 ```
 
+### Plotting The Results
+For 2D simulations please use:
+```
+python3 plotter_2D.py
+```
+And for 3D simulations please use:
+```
+python3 plotter_R_Z.py```
+
 ---
 
 Happy Simulating! Feel free to contribute, report issues, or ask questions.
