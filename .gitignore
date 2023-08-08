@@ -8,3 +8,6 @@
 # Ignore environment folders
 env/
 venv/
+
+# Initial Condition variables
+initial_conditions.txt
