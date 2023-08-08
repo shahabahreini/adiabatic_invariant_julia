@@ -17,10 +17,10 @@ Visit the [official website](https://julialang.org/downloads/) and follow the pr
 
 In the root folder, run the following commands:
 
-\`\`\`
+```bash
 julia install_packages.jl
 python3 pip install -r requirements.txt
-\`\`\`
+```
 
 ## Running Simulation 🚀
 
@@ -35,15 +35,15 @@ Run the Julia core using one of the following methods:
 
 a) **Single-Core Mode:** Use this command for single-core processing, then follow the on-screen instructions:
 
-\`\`\`
+```
 julia Start.jl
-\`\`\`
+```
 
 b) **Multi-Core Mode:** For multi-core processing, add '-t [number of cores]' before calling the Julia script. Here's an example using 4 cores:
 
-\`\`\`
+```
 julia -t 4 Start.jl
-\`\`\`
+```
 
 ---
 
