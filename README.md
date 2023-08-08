@@ -52,7 +52,8 @@ python3 plotter_2D.py
 ```
 And for 3D simulations please use:
 ```
-python3 plotter_R_Z.py```
+python3 plotter_R_Z.py
+```
 
 ---
 
