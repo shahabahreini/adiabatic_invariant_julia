@@ -25,10 +25,10 @@ python3 pip install -r requirements.txt
 ## Running Simulation 🚀
 
 ### Updating Initial Conditions
-Edit "initial_conditions.txt" to update the simulation's initial conditions.
+Edit "**initial_conditions.txt**" to update the simulation's initial conditions.
 
 ### Updating Simulation Equations
-Modify the functions "CylindricalProblem!" in "Simulation2D.jl" or "Simulation3D.jl" to change the dynamics of the simulations.
+Modify the functions "**CylindricalProblem!**" in "**Simulation2D.jl**" or "**Simulation3D.jl**" to change the dynamics of the simulations.
 
 ### Numerical Simulation 🧮
 Run the Julia core using one of the following methods:
@@ -39,7 +39,7 @@ a) **Single-Core Mode:** Use this command for single-core processing, then follo
 julia Start.jl
 ```
 
-b) **Multi-Core Mode:** For multi-core processing, add '-t [number of cores]' before calling the Julia script. Here's an example using 4 cores:
+b) **Multi-Core Mode:** For multi-core processing, add '**-t [number of cores]**' before calling the Julia script. Here's an example using 4 cores:
 
 ```
 julia -t 4 Start.jl
