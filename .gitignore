@@ -1,0 +1,10 @@
+# Ignore image files
+*.png
+*.jpg
+
+# Ignore CSV files
+*.csv
+
+# Ignore environment folders
+env/
+venv/
