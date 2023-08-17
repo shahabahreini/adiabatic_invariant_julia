@@ -71,13 +71,13 @@ function CylindricalProblem!(ddu, du, u, p, t)
 
     # ------------------------------ Exact Equations ----------------------------- #
     # Calculate the l0, frac0, and frac1 terms for efficiency
-    #= l0 = epsilon * sin(alpha_0) * sin(beta_0) / sin(theta_0) * rho_0 - z_0 / sqrt(z_0^2 + rho_0^2)
-    frac0 = (l0 + z / sqrt(z^2 + rho^2))
-    frac1 = (rho^2 + z^2)^(3 / 2)
+    #= l0 = epsilon * sin(alpha_0) * sin(beta_0)*sin(theta_0) - z_0 / sqrt(z_0^2 + rho_0^2)
+    fac0 = sqrt(z^2 + rho^2)
+    fac1 = (rho^2 + z^2)^(3 / 2)
 
     # Update the differential equations
-    ddu[1] = (1 / rho^3) * frac0^2 + z / (rho * frac1) * frac0
-    ddu[2] = -(1 / frac1) * frac0 =#
+    ddu[1] = 1 / rho^3 * (l0 + z / fac0)^2 + z / (rho * fac1) * (l0 + z / fac0)
+    ddu[2] = -1 / fac1 * (l0 + z / fac0) =#
 
     # --------------------------- Approximate Equation --------------------------- #
     eps_p = epsilon * sin(alpha_0) * sin(beta_0) / sin(theta_0)
