@@ -1,5 +1,7 @@
 import os, re
+import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 def search_for_export_csv():
@@ -73,3 +75,42 @@ def read_exported_csv_simulation(path_, fname_):
         inplace=True,
     )
     return df
+
+
+def read_exported_csv_2Dsimulation(path_, fname_):
+    """Gets the folder path and desired file name and load the data into Pandas DataFrame"""
+
+    data = pd.read_csv(fname_)
+    df = pd.DataFrame(
+        data, columns=["timestamp", "omega_rho", "omega_z", "rho", "z", "drho", "dz"]
+    )
+
+    return df
+
+
+def adiabtic_calculator(v_x, x, extremum_idx):
+    velocity = v_x
+    position = x
+    
+    # Compute the changes in the components of X
+    delta_X = position.diff()
+
+    # Compute the cumulative sum of velocity times delta_X
+    adiabatic = np.cumsum(velocity * delta_X)
+
+    # Compute the integral of V.dX between sequential extremum indexes
+    integral_VdX = []
+    for i in range(len(extremum_idx) - 1):
+        start_idx = extremum_idx[i]
+        end_idx = extremum_idx[i + 1]
+        integral = np.sum(velocity[start_idx:end_idx] * delta_X[start_idx:end_idx])
+        integral_VdX.append(integral)
+    
+    # Plot the integral versus cycles
+    plt.plot(range(len(integral_VdX)), integral_VdX)
+    plt.xlabel('Cycles')
+    plt.ylabel('Integral of V.dX')
+    plt.title('Integral versus Cycles')
+    plt.show()
+
+    return adiabatic

@@ -1,20 +1,27 @@
 import pandas as pd
+import re
 import math
 import matplotlib.pyplot as plt
 import os
-import re
+from lib import *
+import lib 
+
+# Import argreletextrema
 import numpy as np
-from lib import search_for_export_csv, extract_parameters_by_file_name
+from scipy.signal import argrelextrema, find_peaks_cwt, find_peaks
+from scipy.misc import electrocardiogram
+from findpeaks import findpeaks
+
 
 # ---------------------------------- Config ---------------------------------- #
 save_file_name = r"2D_omega"
 save_file_extension = ".svg"
 
-do_plot_line_from_origin = False
-
 is_multi_files = False
 target_folder_multi_files = "/csv/1deg/"
 plots_folder = "plots"
+
+fpath = "/csv/exact/"
 
 # doesn't need to update the parameters if individual file is used
 parameter_dict = {
@@ -33,22 +40,55 @@ method = "Feagin14 Method"
 # ------------------------------------ --- ----------------------------------- #
 
 
-def tangent_calculator(x_, y_):
-    return y_ / x_
+def peakfinder_(X):
+    # Initialize
+    fp = findpeaks(method="peakdetect", lookahead=1)
+    results = fp.fit(X)
+
+    peak_idx = peak_couter(results)
+    # Plot
+    fp.plot()
+
+    fp = findpeaks(method="topology", lookahead=1)
+    results = fp.fit(X)
+    #fp.plot()
+    #fp.plot_persistence()
+
+    return peak_idx
 
 
-def point_finder(x_i, y_i, x_f):
-    b = 0
-    m = tangent_calculator(x_i, y_i)
-    y_f = x_f * m + b
+def peak_couter(results):
+    df_result = results["df"]
 
-    xs = [x_i, x_f]
-    ys = [y_i, y_f]
-    return xs, ys
+    count_valleys = df_result[df_result["valley"] == True].shape[0]
+    count_peaks = df_result[df_result["peak"] == True].shape[0]
 
+    chosen_key = "peak" if count_peaks < count_valleys else "valley"
+    peak_indexes = df_result[df_result[chosen_key] == True]["x"]
+    peak_indexes = peak_indexes.tolist()
+    print(peak_indexes)
+    print(df_result[df_result[chosen_key] == True].shape[0])
 
-def Plotter(save_filename):
+    return peak_indexes
+
+def plotter(path_, fname_):
     global parameter_dict
+
+    df = lib.read_exported_csv_2Dsimulation(path_, fname_ + ".csv")
+    varibale_to_find_peaks_with = df["drho"]
+    variable_to_show_peaks_on = df["rho"]
+
+
+    peak_idxx = peakfinder_(varibale_to_find_peaks_with)
+
+    lib.adiabtic_calculator(df["drho"], df["rho"], peak_idxx)
+
+    x_axis_data = [variable_to_show_peaks_on.tolist()[i] for i in peak_idxx]
+    y_axis_data = [i for i in range(1, len(peak_idxx) + 1)]
+
+    # append the end of the simulation to the list
+    # x_axis_data.append(x_.tolist()[-1])
+    # y_axis_data.append(y_axis_data[-1])
 
     # get the list of all csv files
     if is_multi_files:
@@ -69,26 +109,16 @@ def Plotter(save_filename):
     theta = parameter_dict["theta"]
     simulation_time = parameter_dict["time"]
 
-    for fname in filelst:
-        data = pd.read_csv(path_ + fname)
-        df = pd.DataFrame(data, columns=["timestamp", "omega_rho", "omega_z", "rho", "z", "drho", "dz"])
-        y_ = adiabtic_calculator(df)
-
-        x_ = df["timestamp"]
-        #y_ = df["omega_rho"]/df["omega_z"]
-        y_ = df["rho"]
-
-        if is_multi_files:
-            parameter_dict = extract_parameters_by_file_name(fname)
-            linename = "approx " if "approx" in fname else "exact" 
-            plt.plot(x_, y_, label=linename + "→ " + r"$\theta$=" + str(parameter_dict["theta"]))
-        else:
-            plt.plot(x_, y_)
-
-    if do_plot_line_from_origin:
-        xp_, yp_ = point_finder(x_.iloc[0], y_.iloc[0], x_.iloc[-1])
-        plt.plot(xp_, yp_, "--", label=f"line passes origin")
-
+    print(len(x_axis_data), " and ", len(y_axis_data))
+    
+    plt.plot(
+        x_axis_data,
+        y_axis_data,
+        marker="o",
+        markerfacecolor="#344e41",
+        markersize=3,
+        label=f"$\epsilon_\phi = {parameter_dict['epsphi']}$",
+    )
     plt.rcParams["figure.dpi"] = 150
     plt.ylabel(r"$\widetilde{R}$")
     plt.xlabel(r"$\tau$")
@@ -111,47 +141,13 @@ def Plotter(save_filename):
     
     if is_multi_files:
         plt.legend()
+
     plt.tight_layout()
-    path_to_save = os.path.join(plots_folder, str(save_filename + save_file_extension))
+    path_to_save = os.path.join(plots_folder, str(save_file_name + save_file_extension))
     plt.savefig(path_to_save, dpi=600)
-    path_to_save = os.path.join(plots_folder, str(save_filename + ".png"))
+    path_to_save = os.path.join(plots_folder, str(save_file_name + ".png"))
     plt.savefig(path_to_save, dpi=600)
     plt.show()
-
-
-def adiabtic_calculator(df):
-    velocity = df[["drho", "dz"]]
-    position = df[["rho", "z"]]
-
-    velocity_2 = velocity **2
-    print(velocity['drho'].shape)
-
-    integrate = velocity['drho'] * position['z'] - velocity['dz'] * position['rho']
-    integrate_2 = velocity_2['drho'] * position['z'] - velocity_2['dz'] * position['rho']
-
-    # Compute the changes in the components of X
-    delta_X = np.diff(position, axis=0)
-
-    print(velocity.shape)
-
-    adiabatic = np.cumsum(velocity.iloc[:, 0].values * np.append(delta_X[:, 0], 0))
-
-
-
-    # Compute the integral of V.dX as a vector at each time step
-    integral_VdX_vector = np.cumsum(np.sum(velocity[:-1] * delta_X, axis=1))
-
-    print(adiabatic.shape)
-
-    plt.plot(df['timestamp'], adiabatic)
-    #plt.plot(df['timestamp'], integrate)
-    #plt.plot( df['timestamp'], integrate_2)
-
-    plt.show()
-
-    return adiabatic
-
-
 
 
 if not is_multi_files:
@@ -159,5 +155,5 @@ if not is_multi_files:
     indivisual_file_names_to_read = [chosen_csv]
 else:
     chosen_csv = "multi_plot"
-Plotter(chosen_csv.replace(".csv", ""))
-# extract_parameters_by_file_name(indivisual_file_names_to_read[0])
+
+plotter(fpath, chosen_csv.replace(".csv", ""))
