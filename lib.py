@@ -109,8 +109,8 @@ def adiabtic_calculator(v_x, x, extremum_idx):
     # Plot the integral versus cycles
     plt.plot(range(len(integral_VdX)), integral_VdX)
     plt.xlabel('Cycles')
-    plt.ylabel('Integral of V.dX')
-    plt.title('Integral versus Cycles')
+    plt.ylabel(r'$\oint\, V.\, dX$')
+    plt.title('Closed Path Integral Of Radial Velocity per Cycles')
     plt.show()
 
     return adiabatic

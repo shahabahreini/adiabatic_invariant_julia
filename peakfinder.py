@@ -40,14 +40,25 @@ method = "Feagin14 Method"
 # ------------------------------------ --- ----------------------------------- #
 
 
+def my_plot(results):
+    df = results['df']
+    plt.plot(df['x'], df['y'], label=r'$V_X$')
+    plt.plot(df['x'][df['peak']], df['y'][df['peak']], 'rx', label=r'peak')
+    plt.xlabel('Steps (DataPoint Index)')
+    plt.ylabel(r'$V_X$')
+    plt.legend()
+    plt.show()
+
 def peakfinder_(X):
     # Initialize
     fp = findpeaks(method="peakdetect", lookahead=1)
     results = fp.fit(X)
+    my_plot(results)
 
     peak_idx = peak_couter(results)
+
     # Plot
-    fp.plot()
+    fp.plot(xlabel='Steps (DataPoint Index)', ylabel=r'$V_X$')
 
     fp = findpeaks(method="topology", lookahead=1)
     results = fp.fit(X)
@@ -66,8 +77,6 @@ def peak_couter(results):
     chosen_key = "peak" if count_peaks < count_valleys else "valley"
     peak_indexes = df_result[df_result[chosen_key] == True]["x"]
     peak_indexes = peak_indexes.tolist()
-    print(peak_indexes)
-    print(df_result[df_result[chosen_key] == True].shape[0])
 
     return peak_indexes
 
@@ -83,7 +92,7 @@ def plotter(path_, fname_):
 
     lib.adiabtic_calculator(df["drho"], df["rho"], peak_idxx)
 
-    x_axis_data = [variable_to_show_peaks_on.tolist()[i] for i in peak_idxx]
+    x_axis_data = [df["timestamp"].tolist()[i] for i in peak_idxx]
     y_axis_data = [i for i in range(1, len(peak_idxx) + 1)]
 
     # append the end of the simulation to the list
@@ -108,8 +117,6 @@ def plotter(path_, fname_):
     alpha = parameter_dict["alpha"]
     theta = parameter_dict["theta"]
     simulation_time = parameter_dict["time"]
-
-    print(len(x_axis_data), " and ", len(y_axis_data))
     
     plt.plot(
         x_axis_data,
@@ -120,9 +127,9 @@ def plotter(path_, fname_):
         label=f"$\epsilon_\phi = {parameter_dict['epsphi']}$",
     )
     plt.rcParams["figure.dpi"] = 150
-    plt.ylabel(r"$\widetilde{R}$")
+    plt.ylabel(r"$\qquad \sum Cycles$")
     plt.xlabel(r"$\tau$")
-    plt.suptitle(r"$\widetilde{R}$ vs $\tau$", fontsize=12)
+    plt.suptitle(r"Accumulative Number Of Cycles per Dimenssionless Time ($\tau$)", fontsize=12)
     plt.title(
         #f"$\\theta_0 = {theta}^{{\circ}}$ , $\\alpha_0={alpha}^{{\circ}}$ , $\\beta_0 = {beta}^{{\circ}}$, $\\phi_0 = 0.0^{{\circ}}$, $\\kappa = {kappa}$, $\\delta_* = {deltas}$, $\\epsilon_ = {eps}$",
         f"$\\theta_0 = {theta}^{{\circ}}$ , $\\alpha_0={alpha}^{{\circ}}$ , $\\beta_0 = {beta}^{{\circ}}$, $\\phi_0 = 0.0^{{\circ}}$, $\\delta_* = {deltas}$, $\\epsilon_\phi = {epsphi}$, $\\epsilon = {eps}$",
